@@ -1,0 +1,5 @@
+build
+.coverage
+**/__pycache__
+pumaduct/glib.c
+pumaduct/purple_client.c

@@ -1,0 +1,6 @@
+[run]
+omit =
+  **/__init__.py
+  **/tests/*.py
+  pumaduct/im_client_base.py
+  pumaduct/matrix_client.py

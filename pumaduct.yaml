@@ -1,0 +1,162 @@
+###############################################################################
+# This section contains the essential parameters - these MUST
+# be modified to match your installation or nothing will work!
+# Also make sure they are consistent between Matrix AS config and this one.
+###############################################################################
+
+# Matrix server to connect to.
+hs_server: "https://localhost:8448"
+
+# Application Server access token: Matrix server
+# expects us to use this token for all our requests.
+as_access_token: "pumaduct_as_token_for_testing"
+
+# Homeserver access token: we expect all requests
+# from Matrix server to us to use this token.
+hs_access_token: "pumaduct_hs_token_for_testing"
+
+# The address for the HTTP server to bind to, empty string means 'all interfaces'.
+bind_address: ""
+
+# The port for the HTTP server to listen on.
+port: 5000
+
+###############################################################################
+# This section contains the parameters that MIGHT work with their
+# default settings, but it's better to double-check.
+###############################################################################
+
+# Path for libpurple to store its internal info.
+purple_db_path: "/var/lib/synapse/pumaduct"
+
+# DB spec to store accounts and offline messages.
+db_spec: "sqlite:////var/lib/synapse/pumaduct.db"
+
+###############################################################################
+# This section contains the parameters that SHOULD be OK to leave 'as is'.
+###############################################################################
+
+# The local part of the service name that users can use for interacting
+# with the service, full name is formed by appending the host extracted
+# from 'hs_server' below.
+service_localpart: "pumaduct"
+
+# User-visible name of the service.
+service_display_name: "PuMaDuct"
+
+# Configure all networks supported by the bridge.
+# Every network is keyed by its network id (e.g. 'prpl-jabber' or 'skpy').
+# The meaning of the fields is as follows:
+# * 'prefix': prefix to use for all users on this network in their MXIDs.
+# * 'ext_pattern': regex that parses external user ids for this network. Recognized
+#   captures names are 'user' and 'host'.
+# * 'ext_format': format string to generate external user id for this network,
+#   supported substitutions are 'user', 'host', 'hs_host'.
+#
+# The network config can also specify one or multiple values
+# under 'inputs' section with the meaning of the fields as follows:
+# * 'pattern': regex to match client input request.
+# * 'message': message to send to the user for this input. Can use
+#   '{primary}' to refer to the primary input text sent by the client.
+networks:
+  "prpl-jabber":
+    prefix: "xmpp"
+    client: "purple"
+    # We don't really need or use resource, but including it here for completeness.
+    ext_pattern: "^((?P<user>[^@]+)@)?(?P<host>[^/@]+)(/(?P<resource>.*))?$"
+    ext_format: "{user}@{host}"
+  "prpl-hangouts":
+    prefix: "hangouts"
+    client: "purple"
+    use_auth_token: true
+    convert_to_text: "html2text"
+    convert_from_text: "markdown"
+    format: "org.matrix.custom.html"
+    ext_pattern: "^(?P<user>.+)$"
+    ext_format: "{user}"
+    inputs:
+    - pattern: "^https://www.youtube.com/watch" # Explanation video on obtaining auth code
+      message: "Please authorize Matrix bridge (see {primary} for instructions) and reply to this message with the generated auth code."
+  "skpy":
+    prefix: "skype"
+    client: "skpy"
+    convert_to_text: "html2text"
+    convert_from_text: "markdown"
+    format: "org.matrix.custom.html"
+    ext_pattern: "^(?P<user>.+)$"
+    ext_format: "{user}"
+
+# PuMaDuct access control, DO NOT CHANGE THIS unless you
+# understand the implications! In particular, allowing arbitrary
+# users to use PuMaDuct has multiple security risks that are
+# currently not adequately addressed in the code, including
+# (but not limited to) DoS and spamming.
+#
+# The way access control works is as follows:
+# 1. For every event received from Matrix, the sender is first
+#    matched to all patterns in 'users_blacklist',
+#    if at least one pattern matches - the access is denied.
+# 2. If the check (1) goes through, the sender is matched to
+#    all patterns in 'users_whitelist', if at least
+#    one pattern matches - the access is allowed.
+# 3. If none of the two rules above match - access is denied.
+#
+# Note that the match is done using 'raw' MXID, not alias or
+# custom name of the contact.
+#
+# In all patterns '{hs_host}', if present, is replaced by the
+# host name extracted from the 'hs_server' option below.
+#
+# users_blacklist:
+#   - "^@some_local_abusive_username:{hs_host}$"
+#   - "^@some_remote_spammer_username:specific_remote_host$"
+#   - "^@some_globally_bad_username:.+$"
+users_blacklist: []
+
+# Default configuration allows access only for the local users
+# of our homeserver we're connected to.
+users_whitelist:
+  - "^@[^:]+:{hs_host}$"
+
+# Default power level for the registered user in the rooms created by PuMaDuct.
+user_power_level: 100
+
+# This is used in two places:
+# * How often HTTP server checks whether it should quit?
+# * How often shutdown handler should check whether the initiated shutdown is completed?
+shutdown_poll_interval: 1
+
+# Timeout for graceful bridge shutdown, it's terminated unconditionally afterwards.
+shutdown_timeout: 60
+
+# Max number of cached items for various tasks, such as MXID <-> ext contacts translations
+# or senders access control.
+max_cache_items: 1000
+
+# How often to try to reconnect if there's account connection error.
+purple_reconnect_interval: 30
+
+# How often to attempt delivering offline messages.
+offline_messages_delivery_interval: 30
+
+# How often to refresh purple accounts presence on Matrix server.
+presence_refresh_interval: 600
+
+# Whether to sync account profile changes from Matrix side to libpurple,
+# potentially overriding libpurple-side changes.
+sync_account_profile_changes: true
+
+# Whether to sync contacts profiles changes from libpurple side to Matrix,
+# potentially overriding Matrix-side changes.
+sync_contacts_profiles_changes: false
+
+# WARNING: do not set it to false in PROD, this is ONLY for testing!
+verify_hs_cert: true
+
+# If present and set to true - log debugging info from
+# libpurple (note: lots of output!)
+#purple_debug: false
+
+# If present - should point to the python logging config that PuMaDuct will use,
+# see https://docs.python.org/3/library/logging.config.html#module-logging.config
+#logging_config_file: "/etc/synapse/pumaduct.log.config"

@@ -1,0 +1,12 @@
+[Unit]
+Description=PuMaDuct Application Server
+After=network.target synapse@.service
+
+[Service]
+Type=simple
+User=synapse
+ExecStart=/usr/bin/pumaduct -c /etc/synapse/pumaduct.yaml
+
+[Install]
+WantedBy=multi-user.target
+

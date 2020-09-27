@@ -1,0 +1,11 @@
+id: "pumaduct"
+url: "http://localhost:5000"
+as_token: "pumaduct_as_token_for_testing"
+hs_token: "pumaduct_hs_token_for_testing"
+sender_localpart: "pumaduct"
+namespaces:
+  aliases: []
+  rooms: []
+  users:
+    - exclusive: true
+      regex: "@(hangouts|skype|xmpp)-.*"

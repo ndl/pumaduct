@@ -1,0 +1,18 @@
+[MASTER]
+unsafe-load-any-extension=yes
+
+[MESSAGES CONTROL]
+disable=global-statement,locally-disabled,logging-too-many-args,too-few-public-methods
+
+[BASIC]
+good-names=_,_prev_log_record_factory,Base,do_GET,do_PUT,logger,dt
+no-docstring-rgx=^_|^main$|^setUp$|^tearDown$|^test_
+method-rgx=^[a-z_][a-z0-9_]{2,30}$|^test_
+max-args=10
+max-attributes=10
+
+[FORMAT]
+indent-string="  "
+
+[REPORTS]
+reports=no
